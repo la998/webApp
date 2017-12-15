@@ -1,0 +1,29 @@
+#!/usr/bin python
+# -*- coding:UTF-8 -*-
+
+__author__ = 'Leaver'
+
+'''
+async web application
+'''
+
+import logging; logging.basicConfig(leavel=logging.INFO)
+import asyncio, os, json, time
+from datetime import date
+from aiohttp import web
+
+
+def index(request):
+    return web.Response(body=b'<h1>WebApp</h1>')
+
+
+async def init(request):
+    app = web.Application(loop=loop)
+    app.router.add_route('GET', '/', index)
+    srv = await loop.create_server(app.make_handler(), '127.0.0.1', 9000)
+    logging.info('server started at http://127.0.0.1')
+    return srv
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(init(loop))
+loop.run_forever()
