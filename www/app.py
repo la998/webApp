@@ -116,17 +116,29 @@ def datetime_filter(t):
     return u'%s年%月%日' % (dt.year, dt.month, dt.day)
 
 
+"""
 def index(request):
     return web.Response(body=b'<h1>WebApp hello</h1>',content_type='text/html')
+"""
 
 
 async def init(request):
-    app = web.Application(loop=loop)
-    app.router.add_route('GET', '/', index)
+    await orm.create_pool(loop=loop, host='127.0.0.1', port=3306, user='root', password='', db='pyblog')
+    app = web.Application(loop=loop, middlewares=[
+        logger_factory, response_factor
+    ])
+    init_jinja2(app, filters=dict(datetime=datetime_filter))
+    add_routes(app, 'handlers')
+    add_static(app)
     srv = await loop.create_server(app.make_handler(), '127.0.0.1', 8080)
-    logging.info('server started at http://127.0.0.1')
+    logging.info('server started at http://127.0.0.1:8080')
     return srv
+
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(init(loop))
 loop.run_forever()
+
+
+
+
